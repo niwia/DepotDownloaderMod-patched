@@ -888,6 +888,28 @@ namespace DepotDownloader
                 }
             }
 
+            // Sanitize file names to remove null terminators that may exist in manifests
+            if (newManifest?.Files != null)
+            {
+                foreach (var f in newManifest.Files)
+                {
+                    if (!string.IsNullOrEmpty(f.FileName))
+                    {
+                        f.FileName = f.FileName.TrimEnd('\0');
+                    }
+                }
+            }
+            if (oldManifest?.Files != null)
+            {
+                foreach (var f in oldManifest.Files)
+                {
+                    if (!string.IsNullOrEmpty(f.FileName))
+                    {
+                        f.FileName = f.FileName.TrimEnd('\0');
+                    }
+                }
+            }
+
             Console.WriteLine("Manifest {0} ({1})", depot.ManifestId, newManifest.CreationTime);
 
             if (Config.DownloadManifestOnly)

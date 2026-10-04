@@ -100,12 +100,32 @@ namespace DepotDownloader
         public static byte[] AdlerHash(Stream stream, int length)
         {
             uint a = 0, b = 0;
-            for (var i = 0; i < length; i++)
-            {
-                var c = (uint)stream.ReadByte();
+            const int bufferSize = 65536;
+            byte[] buffer = new byte[bufferSize];
+            int remaining = length;
 
-                a = (a + c) % 65521;
-                b = (b + a) % 65521;
+            while (remaining > 0)
+            {
+                int toRead = Math.Min(remaining, bufferSize);
+                int bytesRead = stream.Read(buffer, 0, toRead);
+                if (bytesRead == 0)
+                    break;
+
+                remaining -= bytesRead;
+                int offset = 0;
+                while (offset < bytesRead)
+                {
+                    int step = Math.Min(bytesRead - offset, 5550);
+                    int end = offset + step;
+                    for (int i = offset; i < end; i++)
+                    {
+                        a += buffer[i];
+                        b += a;
+                    }
+                    a %= 65521;
+                    b %= 65521;
+                    offset = end;
+                }
             }
 
             return BitConverter.GetBytes(a | (b << 16));

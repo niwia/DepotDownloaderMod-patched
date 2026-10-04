@@ -1053,6 +1053,46 @@ namespace DepotDownloader
                 File.Delete(fileStagingPath);
             }
 
+            if (file.Flags.HasFlag(EDepotFileFlag.Symlink) || !string.IsNullOrEmpty(file.LinkTarget))
+            {
+                if (!string.IsNullOrEmpty(file.LinkTarget))
+                {
+                    try
+                    {
+                        var dir = Path.GetDirectoryName(fileFinalPath);
+                        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
+
+                        try
+                        {
+                            if (Directory.Exists(fileFinalPath) && File.ResolveLinkTarget(fileFinalPath, false) == null)
+                            {
+                                Directory.Delete(fileFinalPath, true);
+                            }
+                            else
+                            {
+                                File.Delete(fileFinalPath);
+                            }
+                        }
+                        catch { }
+
+                        var linkTarget = Path.DirectorySeparatorChar == '/'
+                            ? file.LinkTarget.Replace('\\', '/')
+                            : file.LinkTarget.Replace('/', '\\');
+
+                        File.CreateSymbolicLink(fileFinalPath, linkTarget);
+                        Console.WriteLine("Created symlink {0} -> {1}", fileFinalPath, linkTarget);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to create symlink {0} -> {1}: {2}", fileFinalPath, file.LinkTarget, ex.Message);
+                    }
+                }
+                return;
+            }
+
             List<DepotManifest.ChunkData> neededChunks;
             var fi = new FileInfo(fileFinalPath);
             var fileDidExist = fi.Exists;

@@ -191,6 +191,7 @@ namespace DepotDownloader
             ContentDownloader.Config.LoginID = HasParameter(args, "-loginid") ? GetParameter<uint>(args, "-loginid") : null;
             ContentDownloader.Config.UseManifestFile = HasParameter(args, "-manifestfile");
             ContentDownloader.Config.ManifestFile = GetParameter<string>(args, "-manifestfile");
+            ContentDownloader.Config.ProbeCDN = HasParameter(args, "-probe-cdn") || HasParameter(args, "-probecdn");
 
             #endregion
 

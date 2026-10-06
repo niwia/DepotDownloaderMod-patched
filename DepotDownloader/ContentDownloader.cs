@@ -1286,7 +1286,10 @@ namespace DepotDownloader
             var chunkID = Convert.ToHexString(chunk.ChunkID).ToLowerInvariant();
 
             var written = 0;
-            var chunkBuffer = ArrayPool<byte>.Shared.Rent((int)chunk.UncompressedLength);
+            // Optimally size chunk buffer for decompressed data (or compressed length if uncompressed not set)
+            var targetBufferSize = Math.Max((int)chunk.UncompressedLength, (int)chunk.CompressedLength);
+            if (targetBufferSize <= 0) targetBufferSize = 1 << 16;
+            var chunkBuffer = ArrayPool<byte>.Shared.Rent(targetBufferSize);
 
             try
             {

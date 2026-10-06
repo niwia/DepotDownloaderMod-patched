@@ -35,5 +35,6 @@ namespace DepotDownloader
 
         public bool UseManifestFile { get; set; }
         public string ManifestFile { get; set; }
+        public bool ProbeCDN { get; set; }
     }
 }
